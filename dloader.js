@@ -16,7 +16,7 @@ function download(urls, output_dir, callback) {
       single_download(url, function(error, result){
         if (error) {
           console.error('Bad request', error);
-          return;
+          return done(null, 'BAD: ' + url);
         }
         var fullpath = path.join(output_dir, result.filename);
 

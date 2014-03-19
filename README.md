@@ -9,3 +9,8 @@ Synopsis
 `node main.js URL_1 [URL_2 [URL_3]]`
 
 URL_*:	well-formed URL to resource to download. No file will be created in case of an malformed URL.
+
+Feature highlights
+----
+1. Parallel downloads
+2. Live progress report
