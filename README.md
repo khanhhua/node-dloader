@@ -14,3 +14,4 @@ Feature highlights
 ----
 1. Parallel downloads
 2. Live progress report
+3. Automatic file naming
