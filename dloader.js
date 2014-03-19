@@ -14,8 +14,10 @@ function download(urls, output_dir, callback) {
     // Returns a list of successfully downloaded Urls
     nimble.map(urls, function(url, done){
       single_download(url, function(error, result){
-        // result:: {filename, data}
-        console.log(url, ' is downloaded.');
+        if (error) {
+          console.error('Bad request', error);
+          return;
+        }
         var fullpath = path.join(output_dir, result.filename);
 
         save_to_local(fullpath, result.data, function(error, result) {
@@ -36,28 +38,36 @@ function download(urls, output_dir, callback) {
 }
 
 function single_download(single_url, callback) {
-  req(single_url, function(error, response, body){
-    if (error) {
-      return callback(error,null);
-    } else if (response.statusCode !== 200) {
-      return callback(new Error('Invalid response code. Only HTTP-200 is acceptable'), null);
-    }
-    // extract the URL for the last path component and use it as the fault filename
-    // URL must be valid so that pathname always starts with a SLASH ('/')
-    var pathname = url.parse(single_url).pathname;
-    if (pathname.lastIndexOf('/')===pathname.length-1)
-      var filename = pathname.substring(1,pathname.length-1).replace(/\//g,'-');
-    else
-      var filename = pathname.slice(pathname.lastIndexOf('/') + 1);
+  var stream = req(single_url);
+  var buffer = null;
+  
+  stream.on('error', function(error) {
+    callback(error);
+  });
 
-    // console.dir(Object.keys(response));
-    // console.log('RESPONSE TYPE: ' + (typeof body));
-    callback(null, {filename:filename, data:response.body});
+  stream.on('data', function(data) {
+      if (!buffer) {
+        buffer = new Buffer(data.length);
+        data.copy(buffer);
+      } else {
+        buffer = Buffer.concat([buffer, data]);
+      }
+      console.log(single_url, '[' + buffer.length + ' bytes] downloaded...');
+  });
+  stream.on('end', function(){
+      var pathname = url.parse(single_url).pathname;
+      
+      if (pathname.lastIndexOf('/')===pathname.length-1)
+        var filename = pathname.substring(1,pathname.length-1).replace(/\//g,'-');
+      else
+        var filename = pathname.slice(pathname.lastIndexOf('/') + 1);
+
+      console.log(single_url, 'completed');
+      callback(null, {filename:filename, data:buffer});
   });
 }
 
 function save_to_local(fullpath, data, callback){
-  console.log('Type: ', typeof data);
   var dir = path.dirname(fullpath);
   if (!fs.existsSync(dir)){
     fs.mkdirSync(dir);
