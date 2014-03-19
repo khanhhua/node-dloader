@@ -1,0 +1,19 @@
+{
+  "name": "dloader",
+  "version": "0.1.0",
+  "description": "Parallel downloader",
+  "main": "main.js",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "keywords": [
+    "nodejs",
+    "demo"
+  ],
+  "author": "Khanh Hua",
+  "license": "MIT",
+  "dependencies": {
+    "nimble": "0.0.2",
+    "request": "^2.34.0"
+  }
+}
